@@ -1,0 +1,266 @@
+{% extends './base.html'%}
+{% block main %}
+{% load static %}
+
+<main class="container my-3 position-relative">
+    <div class="d-flex flex-column justify-content-center align-content-start gap-2 position-relative">
+        <div id="sort" class="d-flex justify-content-center align-content-center border rounded py-2 ">
+            <div class="form-check form-switch d-flex justify-content-center align-items-center flex-grow-1">
+                <div>
+                    <p class="mb-0 text-center">Dépenses de <span class="border-bottom border-white">
+                        {{ get_current_month_local }}</span> : <span
+                            class="fw-bold shadow fa-fade">{{ get_month_spents }} €</span></p>
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'accounts:logout_user' %}"
+                    class="normal-link p-2 rounded-full fa-solid fa-right-from-bracket "></a>
+            </div>
+        </div>
+        <div>
+            <div
+                class="d-flex justify-content-start align-items-center gap-3 overflow-x-auto overflow-y-hidden my-2 pb-2">
+                {% for id, month in get_all_months %}
+                <a href="{% url 'spent:spents_by_month' id %}"
+                    class="{% if id == current_month %} order-first bg-primary border-none {% endif %} month normal-link px-2 py-1 rounded-2 border shadow-sm fs-small one-ligne-text">
+                    {{ month }}
+                </a>
+
+                {% endfor %}
+            </div>
+            <span class="border-bottom">
+                {% if month %}
+                <span class="text-gray fa-fade">{{ month.get_counter }}</span>
+                {% else %}
+                <span class="text-gray fa-fade">{{ todos.count }}</span>
+                {% endif %}
+                <span>Liste des dépenses</span>
+            </span>
+            <div class="cards mt-3 d-flex flex-column justify-content-center align-items-start gap-2 w-100 h-100">
+                {% for spent in spents %}
+                <div class="card bg-dark border rounded px-2 w-100 h-100 py-2">
+                    <h4 class="text-center py-2 mb-0 border-bottom border-white">{{ spent.title }}</h4>
+                    <div class="p-3">
+                        <p>{{ spent.description|linebreaks }}</p>
+                    </div>
+                    <div class="w-100 d-flex justify-content-between align-items-center">
+                        <div class="d-flex flex-column ">
+                            <div class="d-flex justify-content-start gap-2 align-items-start one-ligne-text">
+                                <span class="text-gray">Le : </span>
+                                <span class="fw-bold"> {{ spent.done_at }}</span>
+                            </div>
+                            <div class="d-flex justify-content-start gap-2 align-items-start one-ligne-text">
+                                <span class="text-gray">Montant : </span>
+                                <span class="fw-bold"> {{ spent.get_amout }}</span>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 align-items-center">
+                            <button data-modal-targget="mg-costum-modal-edit-spent-{{spent.id}}"
+                                onclick="open_close_GM_costum_modal(this)" type="button"
+                                class="normal-btn px-2 py-2 rounded d-flex justify-content-center align-items-center bg-secondary text-white">
+                                <i class="fa-solid fa-pen-to-square fa-fade"></i>
+                            </button>
+                            <button data-modal-targget="mg-costum-modal-delete-spent-{{spent.id}}"
+                                onclick="open_close_GM_costum_modal(this)" type="button"
+                                class="normal-btn px-2 py-2 rounded d-flex justify-content-center align-items-center bg-danger text-white"><i
+                                    class="fa-solid fa-trash fa-fade"></i></button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+
+    <div class="mg-costum-modal-holder">
+        <div id="mg-costum-modal-new-spent" class="mg-costum-modal">
+            <div class="mg-costum-modal-header">
+                <div class="mg-costum-modal-header-content">Ajouter une nouvelle dépense</div>
+                <span id="mg-costum-modal-close-span" onclick="close_GM_modal_btns(this)"
+                    class="mg-costum-modal-header-close">&times;</span>
+            </div>
+            <div class="mg-costum-modal-body w-100">
+                <form method="POST" action="{% url 'spent:create' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="done_at">Date : </label>
+                        <div class="d-flex align-items-start gap-2 px-1">
+                            <input class="form-control flex-grow-1" type="date" name="done_at" id="done_at">
+                            <button type="button" onclick="setCurrentDate(this)" required
+                                class="normal-btn bg-success text-white p-2 rounded">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title">Titre : </label>
+                        <input class="form-control" type="text" name="title" id="title" required
+                            title="La titre de la dépanse" placeholder="Décrivez ici un simple title à votre dépense">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description">Description : </label>
+                        <input class="form-control" type="text" name="description" id="description" required
+                            title="La description de la dépanse"
+                            placeholder="Dévloppez ici en écrivantune description à votre dépense">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount">La montant : </label>
+                        <input oninput="handleAmountTypeInput(this)" class="form-control" type="text" name="amount"
+                            id="amount" required title="La montant de votre dépanse"
+                            placeholder="Précisez ici le montant de votre dépanse">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount">Mois : </label>
+                        <select name="month" id="month" class="form-select">
+                            {% for id, month in get_all_months %}
+                            <option value="{{id}}" {% if id is current_month %}selected{% endif %}>{{ month }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="mg-costum-modal-footer">
+                <button class="mg-costum-modal-footer-btn" onclick="close_GM_modal_btns(this)"
+                    id="mg-costum-modal-footer-btn-close">
+                    Annuler
+                </button>
+                <button class="mg-costum-modal-footer-btn bg-success " onclick="handleAddSpent(this)"
+                    id="mg-costum-modal-footer-btn mg-costum-modal-footer-btn-go">
+                    Ajouter
+                </button>
+            </div>
+        </div>
+
+        {% for spent in spents %}
+        <div id="mg-costum-modal-delete-spent-{{spent.id}}" class="mg-costum-modal">
+            <div class="mg-costum-modal-header">
+                <div class="mg-costum-modal-header-content">Suppression de <span class="fw-bold text-gray">
+                    {{ spent.title }}</span></div>
+                <span id="mg-costum-modal-close-span" onclick="close_GM_modal_btns(this)"
+                    class="mg-costum-modal-header-close">&times;</span>
+            </div>
+            <div class="mg-costum-modal-body w-100">
+                <div class="mg-costum-modal-body w-100">
+                    <p class="text-center text-danger">Êtes-vous sûre de valoir supprimer cette dépense ?</p>
+                    <p class="text-center text-danger">Les dépenses supprimées ne sont pas récupérable !</p>
+                </div>
+            </div>
+            <div class="mg-costum-modal-footer">
+                <button class="mg-costum-modal-footer-btn" onclick="close_GM_modal_btns(this)"
+                    id="mg-costum-modal-footer-btn-close">
+                    Annuler
+                </button>
+                <a href="{% url 'spent:delete' spent.id %}" class="mg-costum-modal-footer-btn normal-link bg-success"
+                    id="mg-costum-modal-footer-btn mg-costum-modal-footer-btn-go">Supprimer</a>
+            </div>
+        </div>
+        <!-- ************************************************************************************* -->
+        <div id="mg-costum-modal-edit-spent-{{spent.id}}" class="mg-costum-modal">
+            <div class="mg-costum-modal-header">
+                <div class="mg-costum-modal-header-content">MOdification de <span class="fw-bold text-gray">{{
+                        spent.title }}</span></div>
+                <span id="mg-costum-modal-close-span" onclick="close_GM_modal_btns(this)"
+                    class="mg-costum-modal-header-close">&times;</span>
+            </div>
+            <div class="mg-costum-modal-body w-100">
+                <form method="POST" action="{% url 'spent:update' spent.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="done_at">Date : </label>
+                        <div class="d-flex align-items-start gap-2 px-1">
+                            <input class="form-control flex-grow-1" type="date" name="done_at" id="done_at">
+                            <button type="button" onclick="setCurrentDate(this)" required
+                                class="normal-btn bg-success text-white p-2 rounded">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="title">Titre : </label>
+                        <input class="form-control" value="{{ spent.title }}" type="text" name="title" id="title"
+                            required title="La titre de la dépanse"
+                            placeholder="Décrivez ici un simple title à votre dépense">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description">Description : </label>
+                        <input class="form-control" value="{{ spent.description }}" type="text" name="description"
+                            id="description" required title="La description de la dépanse"
+                            placeholder="Dévloppez ici en écrivantune description à votre dépense">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount">La montant : </label>
+                        <input oninput="handleAmountTypeInput(this)" value="{{ spent.get_abs_amout }}"
+                            class="form-control" type="text" name="amount" id="amount" required
+                            title="La montant de votre dépanse" placeholder="Précisez ici le montant de votre dépanse">
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount">Mois : </label>
+                        <select name="month" id="month" class="form-select">
+                            {% for id, month in get_all_months %}
+                            <option value="{{id}}" {% if id == spent.month %}selected{% endif %}>{{ month }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <p class="text-center mb-0 text-danger error"></p>
+                </form>
+            </div>
+            <div class="mg-costum-modal-footer">
+                <button class="mg-costum-modal-footer-btn" onclick="close_GM_modal_btns(this)"
+                    id="mg-costum-modal-footer-btn-close">
+                    Annuler
+                </button>
+                <button class="mg-costum-modal-footer-btn bg-success " onclick="handleUpdateSpent(this)"
+                    id="mg-costum-modal-footer-btn mg-costum-modal-footer-btn-go">
+                    Ajouter
+                </button>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+
+
+    <button data-modal-targget="mg-costum-modal-new-spent" onclick="open_close_GM_costum_modal(this)" id="create-btn"
+        type="button" class="normal-btn m-0 p-0 bg-success text-white d-flex justify-content-center align-items-center">
+        <i class="fa-solid fa-plus fs-5 fa-fade"></i>
+    </button>
+</main>
+
+<script>
+    function setCurrentDate(btn) {
+        const input = btn.parentElement.querySelector('input#done_at');
+        input.valueAsDate = new Date();
+    }
+    function handleAmountTypeInput(input) {
+        input.value = input.value.replace(/,/g, '.');
+        if (input.value.match(/[^0-9.]/g)) {
+            input.value = input.value.replace(/[^0-9.]/g, '');
+        }
+
+    }
+    function handleAddSpent(btn) {
+        const form = btn.parentElement.parentElement.querySelector('form');
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        form.submit();
+    }
+    function handleUpdateSpent(btn) {
+        const form = btn.parentElement.parentElement.querySelector('form');
+        const errer = form.querySelector('.error');
+        const done_at = form.querySelector('input#done_at');
+        if(!done_at.value){
+            errer.innerHTML = 'La date est obligatoire';
+            return;
+        }
+        btn.disabled = true;
+        btn.classList.add('disabled');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+        form.submit();
+    }
+
+
+</script>
+
+{% endblock main %}

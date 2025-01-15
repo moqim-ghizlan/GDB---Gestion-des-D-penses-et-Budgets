@@ -1,0 +1,62 @@
+.normal-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.normal-link:hover {
+    color: inherit;
+    cursor: pointer;
+}
+
+.text-gray {
+    color: gray !important
+}
+
+.normal-btn {
+    background-color: transparent;
+    border: none;
+    padding: initial;
+    margin: initial;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+.justify-content-stretch {
+    justify-content: stretch !important;
+}
+
+.one-ligne-text {
+    white-space: nowrap;
+}
+
+.rounded-full {
+    border-radius: 50% !important;
+}
+
+.fs-small {
+    font-size: 0.8rem !important;
+}
+
+.overflow-x-auto {
+    overflow-x: auto !important;
+}
+
+.overflow-y-hidden {
+    overflow-y: hidden !important;
+}
+
+.rounded-2 {
+    border-radius: 0.5rem !important
+}
+
+#create-btn {
+    position: fixed;
+    width: 50px;
+    height: 50px;
+    bottom: 1rem;
+    right: 1rem;
+    border-radius: 50%;
+}
+.border-none {
+    border: none !important;
+}

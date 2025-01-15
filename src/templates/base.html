@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  {% load static %}
+  {% load bootstrap5 %}
+  {% bootstrap_css %}
+  {% bootstrap_javascript %}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <!-- <link rel="icon" href="{% static './images/logo.png' %}" type="image/png"> -->
+  <link href="{% static 'fontawesomefree/css/fontawesome.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'fontawesomefree/css/brands.css' %}" rel="stylesheet" type="text/css" />
+  <link href="{% static 'fontawesomefree/css/solid.css' %}" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'assets/css/root.css' %}" />
+  <script defer src="{% static 'assets/js/script.js' %}"></script>
+  <title>GDB</title>
+</head>
+
+<body class="h-100 w-100 bg-dark text-white">
+  {% include "./components/messages.html" %}
+  <script>
+    var toastElList = [].slice.call(document.querySelectorAll(".toast"));
+    var toastList = toastElList.map(function (toastEl) { return new bootstrap.Toast(toastEl); });
+    const toast = toastList[0];
+    if (toast) toast.show();
+  </script>
+  {% block main %}
+  {% endblock main %}
+</body>
+
+</html>
