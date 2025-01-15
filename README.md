@@ -1,9 +1,3 @@
----
-noteId: "eaaf5b10d38011efa6c2d1abb9925e08"
-tags: []
-
----
-
 # GDB - Gestion des Dépenses et Budgets
 
 ## Description
